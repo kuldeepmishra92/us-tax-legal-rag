@@ -6,109 +6,13 @@ a grounded, cited answer.
 
 ---
 
-## 1. High-level diagram
+## High-level diagram
 
 ![System architecture](docs/architecture.png)
 
-<sub>Rendered image above (portable); the interactive Mermaid source is below.</sub>
-
-```mermaid
-flowchart TB
-    subgraph Ingest["① Offline Ingestion (build once)"]
-        direction TB
-        PDF["100 curated PDFs<br/>(Acts · Judgments · POV · Tax)"]
-        PARSE["parser.py<br/>PyMuPDF → page/section text"]
-        CHUNK["chunker.py<br/>small-to-big chunks<br/>+ parent-section context"]
-        PDF --> PARSE --> CHUNK
-        CHUNK --> EMB["embed.py<br/>bge-base-en-v1.5 (local, 768-d)"]
-        CHUNK --> CIT["citation_extractor.py<br/>U.S.C. · Public Laws · Acts · cases"]
-    end
-
-    subgraph Stores["② Indexes / Stores"]
-        direction LR
-        QDRANT[("Qdrant<br/>vector index<br/>6,289 chunks")]
-        ES[("Elasticsearch<br/>BM25 keyword index")]
-        NEO[("Neo4j<br/>citation graph<br/>3,203 authorities · 4,075 edges")]
-    end
-
-    EMB --> QDRANT
-    CHUNK --> ES
-    CIT --> NEO
-
-    subgraph Query["③ Online Query Path"]
-        direction TB
-        Q["User question"]
-        HR["hybrid_retriever.py<br/>vector + BM25 → RRF fusion (k=60)"]
-        RR["reranker.py<br/>bge-reranker-base (optional, off by default)"]
-        LLM["llm_service.py<br/>Gemini 2.5 Pro (Vertex AI)<br/>grounded generation + [N] citations"]
-        VAL["citation_validator.py<br/>anti-hallucination guard<br/>+ one-shot self-correction"]
-        Q --> HR --> RR --> LLM --> VAL
-    end
-
-    QDRANT -.retrieve.-> HR
-    ES -.retrieve.-> HR
-    NEO -.relationship queries.-> GRAPH["graph_retriever.py<br/>'which judgments cite Act X?'"]
-
-    subgraph API["④ Serving"]
-        direction TB
-        FASTAPI["FastAPI backend<br/>/query /summarize /graph/citing /documents /health"]
-        UI["Vanilla-JS frontend<br/>Ask · Summarize · Explore Citations"]
-        UI <--> FASTAPI
-    end
-
-    VAL --> FASTAPI
-    GRAPH --> FASTAPI
-
-    subgraph Eval["⑤ Evaluation (offline)"]
-        direction LR
-        GOLDEN["golden_set.csv<br/>100 hand-authored Q/A"]
-        RUNEVAL["run_eval.py<br/>full pipeline → dataset"]
-        RAGAS["ragas_score.py<br/>(isolated venv-ragas)"]
-        GOLDEN --> RUNEVAL --> RAGAS --> REPORT["evaluation_report.md"]
-    end
-
-    FASTAPI -.exercised by.-> RUNEVAL
-```
-
 ---
 
-## 2. Request lifecycle (an "Ask" query)
-
-```mermaid
-sequenceDiagram
-    participant U as User (browser)
-    participant API as FastAPI /query
-    participant HR as hybrid_retriever
-    participant Q as Qdrant (vector)
-    participant E as Elasticsearch (BM25)
-    participant G as Gemini 2.5 Pro
-    participant V as citation_validator
-
-    U->>API: POST /query {query, category?, top_k?}
-    API->>HR: hybrid_search(q, top_k=12)
-    par parallel retrieval
-        HR->>Q: semantic search (bge embedding)
-    and
-        HR->>E: BM25 keyword search
-    end
-    Q-->>HR: ranked chunks
-    E-->>HR: ranked chunks
-    HR->>HR: Reciprocal Rank Fusion (k=60)
-    HR-->>API: top-12 fused chunks
-    API->>G: prompt(context + question), mandatory [N] citations
-    G-->>API: grounded answer + citations
-    API->>V: validate citations against retrieved chunks
-    alt citation unsupported
-        V->>G: one-shot self-correction
-        G-->>V: corrected answer
-    end
-    V-->>API: {answer, grounded, citations}
-    API-->>U: JSON response (answer + clickable citations)
-```
-
----
-
-## 3. Component responsibilities
+## Component responsibilities
 
 All pipeline modules live in the `legalrag` package under `src/legalrag/`;
 runnable entrypoints live in `scripts/`. Paths below are relative to `src/`.
@@ -132,7 +36,7 @@ runnable entrypoints live in `scripts/`. Paths below are relative to `src/`.
 
 ---
 
-## 4. Key design decisions
+## Key design decisions
 
 - **Hybrid over pure-vector.** Legal text is citation- and term-heavy; BM25 catches
   exact section numbers and statute names that dense vectors blur. RRF fuses both
@@ -154,7 +58,7 @@ runnable entrypoints live in `scripts/`. Paths below are relative to `src/`.
 
 ---
 
-## 5. Data / infra footprint
+## Data / infra footprint
 
 | Store | Docker service | Content |
 |---|---|---|
