@@ -1,0 +1,15 @@
+# Isolated RAGAS evaluation environment (Phase 8) — DO NOT install into the main venv.
+# RAGAS's langchain deps conflict with the main system's langchain 1.x, so it lives in its own venv:
+#   python -m venv venv-ragas && ./venv-ragas/Scripts/python.exe -m pip install -r requirements-ragas.txt
+# Then: ./venv-ragas/Scripts/python.exe eval/ragas_score.py
+# The main system has ZERO langchain dependency, so this quarantine is clean.
+
+datasets==5.0.0
+google-cloud-aiplatform==1.160.0
+google-genai==2.11.0
+langchain==0.3.30
+langchain-community==0.3.31
+langchain-core==0.3.86
+langchain-google-vertexai==2.1.2
+pandas==2.3.3
+ragas==0.2.6

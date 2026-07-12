@@ -1,0 +1,27 @@
+# HF Space runtime dependencies (server-less variant).
+# torch is installed CPU-only in the Dockerfile (from the pytorch CPU index)
+# BEFORE this file, so sentence-transformers reuses it instead of pulling CUDA.
+python-dotenv==1.0.1
+# numpy 1.26 pairs cleanly with the CPU torch 2.2.2 installed in the Dockerfile
+# (avoids the numpy-2.x vs older-torch ABI mismatch). The exported .npy vectors
+# load identically across numpy versions.
+numpy==1.26.4
+
+# retrieval / graph (server-less)
+sentence-transformers==3.2.1
+rank_bm25==0.2.2
+networkx==3.4.2
+
+# imported by legalrag.retrieval.hybrid_retriever at module load; NO server is
+# ever contacted in the Space (the app uses the in-process stores) — these are
+# import-time-only dependencies.
+qdrant-client==1.12.1
+elasticsearch==8.15.1
+
+# generation
+google-genai==2.11.0
+
+# web
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+pydantic==2.13.4

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>US Tax &amp; Legal Research Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol id="i-graph" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4"/><path d="m15.4 6.5-6.8 4"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.2 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  </svg>
+
+  <div class="topbar"><div class="tb-inner">
+    <div class="brand">
+      <div class="mark"><svg class="icon"><use href="#i-scale"/></svg></div>
+      <div>
+        <div class="b-title">US Tax &amp; Legal Research</div>
+        <div class="b-sub">Grounded answers with exact citations · Graph RAG</div>
+      </div>
+    </div>
+    <div id="health" class="status" aria-live="polite"></div>
+  </div></div>
+
+  <nav class="tabs" role="tablist" aria-label="Features"><div class="tabs-inner">
+    <button class="tab active" role="tab" aria-selected="true" id="tabbtn-ask" data-tab="ask"><svg class="icon"><use href="#i-search"/></svg>Ask a Question</button>
+    <button class="tab" role="tab" aria-selected="false" id="tabbtn-summarize" data-tab="summarize"><svg class="icon"><use href="#i-file"/></svg>Summarize</button>
+    <button class="tab" role="tab" aria-selected="false" id="tabbtn-graph" data-tab="graph"><svg class="icon"><use href="#i-graph"/></svg>Explore Citations</button>
+  </div></nav>
+
+  <!-- ASK -->
+  <main id="tab-ask" class="tab-panel active" role="tabpanel" aria-labelledby="tabbtn-ask">
+    <form id="ask-form" class="searchbar">
+      <label class="field">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input id="query" type="text" placeholder="e.g. What is the 2025 standard deduction for a single filer?" autocomplete="off" aria-label="Legal or tax question" />
+      </label>
+      <span class="sel">
+        <select id="category" aria-label="Filter by document type">
+          <option value="all">All categories</option>
+          <option value="acts">Acts</option>
+          <option value="judgments">Court Judgments</option>
+          <option value="pov">POV (Commentary)</option>
+          <option value="tax">Tax Documents</option>
+        </select>
+        <svg class="icon icon-sm chev"><use href="#i-chev"/></svg>
+      </span>
+      <button type="submit" id="ask-btn" class="btn"><svg class="icon icon-sm"><use href="#i-arrow"/></svg>Ask</button>
+    </form>
+    <div class="chips" id="ask-examples">
+      <span class="lbl">Try</span>
+      <button type="button" class="chip" data-q="What is the standard deduction for a single filer?">Standard deduction</button>
+      <button type="button" class="chip" data-q="Who can claim the Child Tax Credit?">Child Tax Credit</button>
+      <button type="button" class="chip" data-q="What did the court hold in Seven County v. Eagle County?">Seven County holding</button>
+      <button type="button" class="chip" data-q="What are the penalties for failure to file a tax return?">Failure-to-file penalties</button>
+    </div>
+
+    <div id="ask-status" class="status-line"></div>
+    <div id="ask-loader" class="loader hidden">
+      <div class="scan"><div id="ask-lottie" class="lottie"></div>
+        <div class="scan-fallback"><div class="ring"></div><div class="arc"></div><svg class="icon"><use href="#i-search"/></svg></div></div>
+      <div class="cap">Searching the corpus and generating a grounded answer…</div>
+    </div>
+
+    <section id="answer-section" class="card hidden">
+      <div class="eyebrow">
+        <span class="lab">Answer</span>
+        <span id="grounded-badge" class="pill"></span>
+        <button id="copy-btn" class="icon-btn"><svg class="icon icon-sm"><use href="#i-copy"/></svg>Copy</button>
+      </div>
+      <div id="answer" class="answer"></div>
+
+      <div id="related-section" class="related hidden">
+        <div class="sec-h"><svg class="icon"><use href="#i-graph"/></svg>Related documents<span class="gtag">GRAPH RAG</span></div>
+        <p class="rhint">Connected to the sources above in the citation graph — open to explore their references.</p>
+        <div id="related-docs" class="drow"></div>
+        <div id="shared-auth" class="auth-row"></div>
+      </div>
+
+      <div class="sec-h"><svg class="icon"><use href="#i-file"/></svg>Citations &amp; References</div>
+      <ul id="citations" class="cites"></ul>
+    </section>
+
+    <div id="ask-empty" class="empty">
+      <div class="empty-ic"><svg class="icon"><use href="#i-search"/></svg></div>
+      <p>Ask a legal or tax question in plain English. Every answer is grounded in the source documents, with clickable citations to the exact document, section, and page.</p>
+    </div>
+  </main>
+
+  <!-- SUMMARIZE -->
+  <main id="tab-summarize" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-summarize">
+    <div class="searchbar">
+      <span class="sel field-grow">
+        <select id="doc-select" aria-label="Document to summarize"><option value="">Loading documents…</option></select>
+        <svg class="icon icon-sm chev"><use href="#i-chev"/></svg>
+      </span>
+      <button id="summarize-btn" class="btn"><svg class="icon icon-sm"><use href="#i-file"/></svg>Summarize</button>
+    </div>
+    <div id="sum-status" class="status-line"></div>
+    <div id="sum-loader" class="loader hidden">
+      <div class="scan"><div id="sum-lottie" class="lottie"></div>
+        <div class="scan-fallback"><div class="ring"></div><div class="arc"></div><svg class="icon"><use href="#i-file"/></svg></div></div>
+      <div class="cap">Reading the document and writing a faithful summary…</div>
+    </div>
+    <section id="summary-section" class="card hidden">
+      <div class="eyebrow"><span class="lab">Summary</span><span id="summary-cat" class="catb"></span></div>
+      <h2 id="summary-title" class="sum-title"></h2>
+      <div id="summary" class="answer"></div>
+    </section>
+    <div id="sum-empty" class="empty">
+      <div class="empty-ic"><svg class="icon"><use href="#i-file"/></svg></div>
+      <p>Pick any of the 100 corpus documents to get a concise, faithful summary of its key provisions.</p>
+    </div>
+  </main>
+
+  <!-- GRAPH -->
+  <main id="tab-graph" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-graph">
+    <p class="hint">Graph RAG — find which documents <strong>cite or reference</strong> a given Act, statute, or case. Something pure semantic search can't answer.</p>
+    <form id="graph-form" class="searchbar">
+      <label class="field">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input id="graph-ref" type="text" placeholder="e.g. Fiscal Responsibility Act · Clean Air Act · 50 USC 1801" autocomplete="off" aria-label="Act, statute, or case name" />
+      </label>
+      <span class="sel">
+        <select id="graph-cat" aria-label="Filter citing documents by category">
+          <option value="all">Any citing doc</option>
+          <option value="acts">Acts only</option>
+          <option value="judgments">Judgments only</option>
+          <option value="pov">POV only</option>
+          <option value="tax">Tax only</option>
+        </select>
+        <svg class="icon icon-sm chev"><use href="#i-chev"/></svg>
+      </span>
+      <button type="submit" id="graph-btn" class="btn"><svg class="icon icon-sm"><use href="#i-graph"/></svg>Find citing documents</button>
+    </form>
+    <div class="chips">
+      <span class="lbl">Try</span>
+      <button type="button" class="chip ex-graph" data-q="Fiscal Responsibility Act">Fiscal Responsibility Act</button>
+      <button type="button" class="chip ex-graph" data-q="Clean Air Act">Clean Air Act</button>
+      <button type="button" class="chip ex-graph" data-q="Administrative Procedure Act">Administrative Procedure Act</button>
+      <button type="button" class="chip ex-graph" data-q="50 USC 1801">50 USC 1801</button>
+    </div>
+    <div id="graph-status" class="status-line"></div>
+    <div id="graph-loader" class="loader hidden">
+      <div class="scan"><div id="graph-lottie" class="lottie"></div>
+        <div class="scan-fallback"><div class="ring"></div><div class="arc"></div><svg class="icon"><use href="#i-graph"/></svg></div></div>
+      <div class="cap">Traversing the citation graph…</div>
+    </div>
+    <section id="graph-section" class="card hidden">
+      <div class="eyebrow"><span class="lab">Documents citing “<span id="graph-ref-label"></span>”</span><span id="graph-count" class="pill pill-blue"></span></div>
+      <div id="graph-results" class="graph-groups"></div>
+    </section>
+    <div id="graph-empty" class="empty">
+      <div class="empty-ic"><svg class="icon"><use href="#i-graph"/></svg></div>
+      <p>Enter an Act, statute, or case name to traverse the citation graph and see every corpus document that references it — grouped by type.</p>
+    </div>
+  </main>
+
+  <footer><span id="model-tag"></span> · Built for the AI-Powered US Tax &amp; Legal Research assignment</footer>
+
+  <script src="/static/assets/lottie.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# NEVER push secrets — the Space is public. Credentials for the HOSTED Space go
+# in HF Settings -> Variables and secrets, not in a file.
+.env
+.env.local
+vertex-key.json
+*-key.json
+*credentials*.json
+
+# python caches
+__pycache__/
+*.pyc

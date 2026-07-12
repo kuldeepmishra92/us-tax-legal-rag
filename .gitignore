@@ -1,0 +1,22 @@
+# secrets — never commit
+vertex-key.json
+.env
+
+# virtual environments
+venv/
+venv-ragas/
+
+# python caches / build artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+src/*.egg-info/
+
+# large regenerable binary artifacts (Qdrant snapshots)
+backups/
+
+# transient run logs (build/eval stdout captures)
+*.log
+# ...but keep the corpus-download provenance log (already tracked)
+!dataset/_reports/build_run.log

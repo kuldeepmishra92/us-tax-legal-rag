@@ -1,0 +1,37 @@
+  US Tax & Legal RAG System — dependencies, grouped by phase
+# Install as each phase begins; installing everything upfront is fine too.
+
+# --- Phase 0 / shared ---
+python-dotenv==1.0.1
+pytest==8.3.3
+
+# --- Phase 1: Parsing & Chunking ---
+pymupdf==1.28.0
+tiktoken==0.8.0
+
+# --- Phase 2: Vector Indexing ---
+voyageai==0.3.1
+qdrant-client==1.12.1
+
+# --- Phase 3: Keyword Indexing ---
+elasticsearch==8.15.1
+
+# --- Phase 4: Hybrid Retrieval ---
+sentence-transformers==3.2.1
+
+# --- Phase 5: LLM Answer Generation ---
+# NEW SDK required: the account's key is the AQ.-prefixed "authorization key"
+# format (Google's 2026 migration). The old google-generativeai SDK cannot
+# authenticate AQ. keys (401 ACCESS_TOKEN_TYPE_UNSUPPORTED); google-genai can.
+google-genai==2.11.0
+
+# --- Phase 6: Backend / Frontend ---
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+
+# --- Phase 7: Graph RAG ---
+neo4j==5.26.0
+
+# --- Phase 8: Evaluation ---
+ragas==0.2.6
+pandas==2.2.3

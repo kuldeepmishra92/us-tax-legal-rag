@@ -1,0 +1,55 @@
+flowchart TB
+    subgraph Ingest["① Offline Ingestion (build once)"]
+        direction TB
+        PDF["100 curated PDFs<br/>(Acts · Judgments · POV · Tax)"]
+        PARSE["parser.py<br/>PyMuPDF → page/section text"]
+        CHUNK["chunker.py<br/>small-to-big chunks<br/>+ parent-section context"]
+        PDF --> PARSE --> CHUNK
+        CHUNK --> EMB["embed.py<br/>bge-base-en-v1.5 (local, 768-d)"]
+        CHUNK --> CIT["citation_extractor.py<br/>U.S.C. · Public Laws · Acts · cases"]
+    end
+
+    subgraph Stores["② Indexes / Stores"]
+        direction LR
+        QDRANT[("Qdrant<br/>vector index<br/>6,289 chunks")]
+        ES[("Elasticsearch<br/>BM25 keyword index")]
+        NEO[("Neo4j<br/>citation graph<br/>3,203 authorities · 4,075 edges")]
+    end
+
+    EMB --> QDRANT
+    CHUNK --> ES
+    CIT --> NEO
+
+    subgraph Query["③ Online Query Path"]
+        direction TB
+        Q["User question"]
+        HR["hybrid_retriever.py<br/>vector + BM25 → RRF fusion (k=60)"]
+        RR["reranker.py<br/>bge-reranker-base (optional, off by default)"]
+        LLM["llm_service.py<br/>Gemini 2.5 Pro (Vertex AI)<br/>grounded generation + [N] citations"]
+        VAL["citation_validator.py<br/>anti-hallucination guard<br/>+ one-shot self-correction"]
+        Q --> HR --> RR --> LLM --> VAL
+    end
+
+    QDRANT -.retrieve.-> HR
+    ES -.retrieve.-> HR
+    NEO -.relationship queries.-> GRAPH["graph_retriever.py<br/>'which judgments cite Act X?'"]
+
+    subgraph API["④ Serving"]
+        direction TB
+        FASTAPI["FastAPI backend<br/>/query /summarize /graph/citing /documents /health"]
+        UI["Vanilla-JS frontend<br/>Ask · Summarize · Explore Citations"]
+        UI <--> FASTAPI
+    end
+
+    VAL --> FASTAPI
+    GRAPH --> FASTAPI
+
+    subgraph Eval["⑤ Evaluation (offline)"]
+        direction LR
+        GOLDEN["golden_set.csv<br/>100 hand-authored Q/A"]
+        RUNEVAL["run_eval.py<br/>full pipeline → dataset"]
+        RAGAS["ragas_score.py<br/>(isolated venv-ragas)"]
+        GOLDEN --> RUNEVAL --> RAGAS --> REPORT["evaluation_report.md"]
+    end
+
+    FASTAPI -.exercised by.-> RUNEVAL

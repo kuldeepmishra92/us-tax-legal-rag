@@ -1,0 +1,33 @@
+collection has 6289 points
+
+=== Integrity check ===
+sampled 200 points, 0 bad vectors found
+
+=== Running full 100-query golden set retrieval ===
+  ...20/100 queries evaluated
+  ...40/100 queries evaluated
+  ...60/100 queries evaluated
+  ...80/100 queries evaluated
+  ...100/100 queries evaluated
+
+=== Retrieval Accuracy (n=100) ===
+  Top-1: 91.0%
+  Top-3: 97.0%
+  Top-5: 98.0%
+
+=== By category ===
+  acts         Top-1: 100.0%  Top-5: 100.0%  (n=25)
+  judgments    Top-1: 96.0%  Top-5: 96.0%  (n=25)
+  pov          Top-1: 100.0%  Top-5: 100.0%  (n=25)
+  tax          Top-1: 68.0%  Top-5: 96.0%  (n=25)
+
+=== Score calibration ===
+  top-hit score range: 0.613 - 0.856, mean 0.752
+
+=== Misses (not in top-5): 2/100 ===
+  [tax] 'According to IRS Publication 505, what income threshold triggers the 0' -> expected 'IRS Publication 505 — Tax Withholding and Estimate', rank=None
+  [judgments] 'Which Justice wrote the dissenting opinion in Feliciano v. Department ' -> expected 'FELICIANO v. DEPARTMENT OF TRANSPORTATION', rank=None
+
+==================================================
+INTEGRITY: clean sample — OK
+RETRIEVAL: Top-1 91.0% / Top-5 98.0%

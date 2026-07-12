@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv dataset *)",
+      "Bash(mkdir -p dataset/acts dataset/judgments dataset/commentary dataset/tax dataset/_reports)"
+    ]
+  }
+}
