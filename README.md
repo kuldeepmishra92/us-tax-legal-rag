@@ -29,7 +29,7 @@ Built for accuracy and traceability: **0% hallucination / 100% grounded** on a
 
 ## Architecture
 
-![System architecture](docs/architecture.png)
+![System architecture](docs/architecture-new.png)
 
 Full request-lifecycle sequence diagram and design rationale in
 [ARCHITECTURE.md](ARCHITECTURE.md).
